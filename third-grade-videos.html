@@ -182,7 +182,8 @@
                 <div class="video-card">
                     <div class="video-thumbnail">
                         <img loading="lazy" src="covers/3/64654654.png">
-                        <a href="https://youtu.be/BiHltVXYX1A" class="play-button" data-content-id="T2">
+                        <!-- changed to data-video-id to avoid direct external navigation -->
+                        <a href="#" class="play-button" data-video-id="BiHltVXYX1A" data-content-id="T2">
                             <i class="fas fa-play"></i>
                         </a>
                     </div>
@@ -197,7 +198,7 @@
                 <div class="video-card">
                     <div class="video-thumbnail">
                         <img loading="lazy" src="covers/3/3.png">
-                        <a href="https://www.youtube.com/embed/ntMYhfShCPI" class="play-button" data-content-id="T3">
+                        <a href="#" class="play-button" data-video-id="ntMYhfShCPI" data-content-id="T3">
                             <i class="fas fa-play"></i>
                         </a>
                     </div>
@@ -212,7 +213,7 @@
                 <div class="video-card">
                     <div class="video-thumbnail">
                         <img loading="lazy" src="covers\3\moaskar.png">
-                        <a href="https://youtu.be/uq0jIqp1AVE" class="play-button" data-content-id="T4">
+                        <a href="#" class="play-button" data-video-id="uq0jIqp1AVE" data-content-id="T4">
                             <i class="fas fa-play"></i>
                         </a>
                     </div>
@@ -227,7 +228,7 @@
                 <div class="video-card">
                     <div class="video-thumbnail">
                         <img loading="lazy" src="covers\3\3330.png">
-                        <a href="https://youtu.be/HWppTowZ8Go" class="play-button" data-content-id="T5">
+                        <a href="#" class="play-button" data-video-id="HWppTowZ8Go" data-content-id="T5">
                             <i class="fas fa-play"></i>
                         </a>
                     </div>
@@ -249,7 +250,7 @@
                 <div class="video-card">
                     <div class="video-thumbnail">
                         <img loading="lazy" src="covers\3\1616.png">
-                        <a href="https://youtu.be/izUEfpwDOnI" class="play-button" data-content-id="T6">
+                        <a href="#" class="play-button" data-video-id="izUEfpwDOnI" data-content-id="T6">
                             <i class="fas fa-play"></i>
                         </a>
                     </div>
@@ -264,7 +265,7 @@
                 <div class="video-card">
                     <div class="video-thumbnail">
                         <img loading="lazy" src="covers\3\2626.png">
-                        <a href="https://youtu.be/iU_X5pxsHLk" class="play-button" data-content-id="T7">
+                        <a href="#" class="play-button" data-video-id="iU_X5pxsHLk" data-content-id="T7">
                             <i class="fas fa-play"></i>
                         </a>
                     </div>
@@ -311,5 +312,26 @@
     </footer>
 
     <script src="script.js"></script>
+    <!-- Modal player container (hidden) -->
+    <div id="videoModal" class="modal-bg" style="display:none;">
+        <div class="modal-box" style="position:relative; padding:0; max-width:960px; width:90%;">
+            <!-- iframe container -->
+            <div id="playerWrapper" style="position:relative; padding-top:56.25%; background:#000;">
+                <div id="ytPlayer" style="position:absolute;top:0;left:0;width:100%;height:100%;"></div>
+                <!-- overlay to block YouTube native UI (share, title, buttons) -->
+                <div id="playerOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:5;" ></div>
+            </div>
+            <!-- custom controls -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#111; color:#fff;">
+                <div>
+                    <button id="modalPlayPause" style="background:#e31837;border:none;padding:8px 14px;color:#fff;border-radius:6px;">إيقاف/تشغيل</button>
+                    <button id="modalStop" style="margin-left:8px;background:#444;border:none;padding:8px 14px;color:#fff;border-radius:6px;">إغلاق</button>
+                </div>
+                <div id="modalTitle" style="font-size:14px;">&nbsp;</div>
+            </div>
+        </div>
+    </div>
+    <!-- Load YouTube IFrame API -->
+    <script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>

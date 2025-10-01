@@ -209,3 +209,136 @@ forms.forEach(form => {
         // Add your form handling logic here
     });
 });
+
+// -----------------------------
+// YouTube modal player (privacy / UI blocking)
+// -----------------------------
+// This code opens a modal with a YouTube IFrame created via API.
+// It places a transparent overlay over the iframe to block YouTube's native UI (share/menu) so no share link is exposed.
+// Interaction with the overlay will pause the video and keep the share/menu inaccessible.
+
+let ytPlayer = null;
+let currentVideoId = null;
+let ytReady = false;
+
+function onYouTubeIframeAPIReady() {
+    ytReady = true;
+}
+
+function createPlayer(videoId) {
+    if (!ytReady) {
+        // If API not ready yet, try again shortly
+        setTimeout(() => createPlayer(videoId), 200);
+        return;
+    }
+
+    if (ytPlayer) {
+        ytPlayer.loadVideoById(videoId);
+        return;
+    }
+
+    ytPlayer = new YT.Player('ytPlayer', {
+        height: '100%',
+        width: '100%',
+        videoId: videoId,
+        playerVars: {
+            rel: 0,
+            modestbranding: 1,
+            controls: 1,
+            disablekb: 0,
+            fs: 1,
+            iv_load_policy: 3,
+            playsinline: 1
+        },
+        events: {
+            onStateChange: function(e) {
+                // When video ends or is paused, update UI if needed
+            }
+        }
+    });
+}
+
+// Open modal and set up overlay behaviour
+function openModal(videoId, title) {
+    currentVideoId = videoId;
+    createPlayer(videoId);
+    const modal = document.getElementById('videoModal');
+    const overlay = document.getElementById('playerOverlay');
+    const modalTitle = document.getElementById('modalTitle');
+    modalTitle.textContent = title || '';
+    modal.style.display = 'flex';
+
+    // Prevent pointer events reaching iframe (blocks share/menu)
+    overlay.style.pointerEvents = 'auto';
+
+    // Clicking overlay will pause the player and keep modal open
+    overlay.onclick = function(e) {
+        if (ytPlayer && typeof ytPlayer.pauseVideo === 'function') {
+            ytPlayer.pauseVideo();
+        }
+        // Optionally give a small visual feedback
+        overlay.style.background = 'transparent';
+    };
+}
+
+function closeModal() {
+    const modal = document.getElementById('videoModal');
+    modal.style.display = 'none';
+    if (ytPlayer && typeof ytPlayer.stopVideo === 'function') {
+        ytPlayer.stopVideo();
+    }
+}
+
+// Hook custom buttons
+document.addEventListener('click', function(e) {
+    // Open video modal when clicking our play-button anchors
+    const play = e.target.closest && e.target.closest('.play-button');
+    if (play) {
+        e.preventDefault();
+        const vid = play.getAttribute('data-video-id');
+        const titleEl = play.closest('.video-card') && play.closest('.video-card').querySelector('.video-title');
+        const title = titleEl ? titleEl.textContent.trim() : '';
+        if (vid) openModal(vid, title);
+    }
+});
+
+// Modal control buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const playPauseBtn = document.getElementById('modalPlayPause');
+    const stopBtn = document.getElementById('modalStop');
+
+    if (playPauseBtn) {
+        playPauseBtn.addEventListener('click', function() {
+            if (!ytPlayer) return;
+            const state = ytPlayer.getPlayerState();
+            // 1 = playing, 2 = paused
+            if (state === YT.PlayerState.PLAYING) ytPlayer.pauseVideo();
+            else ytPlayer.playVideo();
+        });
+    }
+
+    if (stopBtn) {
+        stopBtn.addEventListener('click', function() {
+            closeModal();
+        });
+    }
+});
+
+// Additional safety: intercept any attempt to open YouTube share links in target anchors
+document.addEventListener('click', function(e) {
+    const a = e.target.closest && e.target.closest('a');
+    if (!a) return;
+    const href = a.getAttribute('href') || '';
+    // If the link goes to youtube directly from within the app's video tiles, block navigation
+    if (href.includes('youtube.com') || href.includes('youtu.be')) {
+        // If it's an external social link in footer allow it; otherwise block to prevent direct share
+        if (!a.classList.contains('external-allow')) {
+            e.preventDefault();
+            // If there's a data-video-id, open our modal instead
+            const vid = a.getAttribute('data-video-id');
+            if (vid) {
+                openModal(vid);
+            }
+        }
+    }
+});
